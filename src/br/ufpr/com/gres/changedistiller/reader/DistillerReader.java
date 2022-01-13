@@ -24,13 +24,18 @@ public class DistillerReader {
 
 	public static void main(String[] args) {
 		
-		String file1 = args[0]; 
-		String file2 = args[1];
-		String path = args[3];
 		
+		String classPreviousCommit = args[0];
+		String classCurrentCommit = args[1]; 
+		String csvPath = args[2];
+		String projectName  = args[3];
+		String currentCommit  = args[4];
+		String previousCommit  = args[5];
 		
-		File left = new File(file1);
-		File right = new File(file2);
+
+		
+		File left = new File(classPreviousCommit);
+		File right = new File(classCurrentCommit);
 
 		FileDistiller distiller = ChangeDistiller.createFileDistiller(Language.JAVA);
 	
@@ -44,7 +49,6 @@ public class DistillerReader {
 		       attach the full stack trace along with the two files that you tried to distill. */
 		    System.err.println("Warning: error while change distilling. " + e.getMessage());
 		}
-
 		List<SourceCodeChange> changes = distiller.getSourceCodeChanges();
 		StatementLevelChanges statementLevelChanges = new StatementLevelChanges();
 		ClassDeclarationChanges classDeclarationChanges = new ClassDeclarationChanges();
@@ -168,14 +172,16 @@ public class DistillerReader {
 		    		"RETURN_TYPE_CHANGE","RETURN_TYPE_DELETE","RETURN_TYPE_INSERT","METHOD_RENAMING","PARAMETER_DELETE","PARAMETER_INSERT","PARAMETER_ORDERING_CHANGE","PARAMETER_RENAMING","PARAMETER_TYPE_CHANGE","TOTAL_METHODDECLARATIONSCHANGES",
 		    		"ATTRIBUTE_RENAMING","ATTRIBUTE_TYPE_CHANGE","TOTAL_ATTRIBUTEDECLARATIONCHANGES",
 		    		"ADDING_ATTRIBUTE_MODIFIABILITY","REMOVING_ATTRIBUTE_MODIFIABILITY","REMOVING_CLASS_DERIVABILITY","REMOVING_METHOD_OVERRIDABILITY","ADDING_CLASS_DERIVABILITY","ADDING_CLASS_DERIVABILITY","ADDING_METHOD_OVERRIDABILITY", "TOTAL_DECLARATIONPARTCHANGES"};
-		    
-		    String[] data1 = ArrayUtils.addAll(statementLevelChanges.getCsvDataSimple(),classDeclarationChanges.getCsvDataSimple());
-		    String[] data2 = ArrayUtils.addAll(data1,methodDeclarationChanges.getCsvDataSimple());
-		    String[] data3 = ArrayUtils.addAll(data2,attributeDeclarationChanges.getCsvDataSimple());
+		    String[] data1 = {projectName,currentCommit,previousCommit,classCurrentCommit,classPreviousCommit};
+		    String[] data2 = ArrayUtils.addAll(data1,statementLevelChanges.getCsvDataSimple());
+		    String[] data3 = ArrayUtils.addAll(data2,classDeclarationChanges.getCsvDataSimple());
+		    String[] data4 = ArrayUtils.addAll(data3,methodDeclarationChanges.getCsvDataSimple());
+		    String[] data5 = ArrayUtils.addAll(data4,attributeDeclarationChanges.getCsvDataSimple());
+		    String[] dataFinal = ArrayUtils.addAll(data5,declarationPartChange.getCsvDataSimple());
 		    
 		    List<String[]> csvData = new ArrayList<>();
 
-		    try (CSVWriter writer = new CSVWriter(new FileWriter(path))) {
+		    try (CSVWriter writer = new CSVWriter(new FileWriter(csvPath))) {
 	            writer.writeAll(csvData);
 	        
 		    } catch (IOException e) {
@@ -184,18 +190,6 @@ public class DistillerReader {
 		}	
 	}
 	
-	private  List<String[]> getCsvDataSimple() {
-        String[] header = {"id", "name", "address", "phone"};
-        String[] record1 = {"1", "first name", "address 1", "11111"};
-        String[] record2 = {"2", "second name", "address 2", "22222"};
-
-        List<String[]> list = new ArrayList<>();
-        list.add(header);
-        list.add(record1);
-        list.add(record2);
-
-        return list;
-    }
 	
 	
 }
