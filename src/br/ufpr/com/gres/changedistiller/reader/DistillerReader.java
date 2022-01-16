@@ -1,6 +1,8 @@
 package br.ufpr.com.gres.changedistiller.reader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,6 +23,17 @@ import ch.uzh.ifi.seal.changedistiller.distilling.FileDistiller;
 import ch.uzh.ifi.seal.changedistiller.model.entities.SourceCodeChange;
 
 public class DistillerReader {
+	
+	/*
+	 * To install changedistiller jar
+	 * mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile="ABSOLUTE/PATH/TO/ChangeDistillerReader/library/changedistiller-0.0.1-SNAPSHOT-jar-with-dependencies.jar"
+
+
+		EX execucao:
+		
+		java -jar ChangeDistillerReader-0.0.1-SNAPSHOT.jar /Users/rogeriocarvalho/Downloads/classes/ImmutableMap.java /Users/rogeriocarvalho/Downloads/classes/ImmutableMap_v2.java /Users/rogeriocarvalho/classes/teste.csv projetoTeste xxx02 xxx01
+	 * 
+	 * */
 
 	public static void main(String[] args) {
 		
@@ -160,28 +173,49 @@ public class DistillerReader {
 			}
 		    //para cada projeto (em um determinado commit) gerar um csv contendo o nome do projeto, commit analisado ( commit N e N-1), classe, os FGC e total de FGC
 					
-		    System.out.println(statementLevelChanges.toString());
-		    System.out.println(classDeclarationChanges.toString());
-		    System.out.println(methodDeclarationChanges.toString());
-		    System.out.println(attributeDeclarationChanges.toString());
-		    System.out.println(declarationPartChange.toString());
+		  //  System.out.println(statementLevelChanges.toString());
+		 //   System.out.println(classDeclarationChanges.toString());
+		 //   System.out.println(methodDeclarationChanges.toString());
+		  //  System.out.println(attributeDeclarationChanges.toString());
+		 //   System.out.println(declarationPartChange.toString());
 		    
 		    String[] header = {"PROJECT_NAME", "CURRENT_COMMIT", "PREVIOUS_COMMIT", "CLASS_CURRENTCOMMIT","CLASS_PREVIOUSCOMMIT",
 		    		"STATEMENT_DELETE", "STATEMENT_INSERT", "STATEMENT_ORDERING_CHANGE","STATEMENT_PARENT_CHANGE","STATEMENT_UPDATE","TOTAL_STATEMENTLEVELCHANGES",
 		    		"PARENT_CLASS_CHANGE", "PARENT_CLASS_DELETE", "PARENT_CLASS_INSERT","CLASS_RENAMING","TOTAL_CLASSDECLARATIONCHANGES",
 		    		"RETURN_TYPE_CHANGE","RETURN_TYPE_DELETE","RETURN_TYPE_INSERT","METHOD_RENAMING","PARAMETER_DELETE","PARAMETER_INSERT","PARAMETER_ORDERING_CHANGE","PARAMETER_RENAMING","PARAMETER_TYPE_CHANGE","TOTAL_METHODDECLARATIONSCHANGES",
 		    		"ATTRIBUTE_RENAMING","ATTRIBUTE_TYPE_CHANGE","TOTAL_ATTRIBUTEDECLARATIONCHANGES",
-		    		"ADDING_ATTRIBUTE_MODIFIABILITY","REMOVING_ATTRIBUTE_MODIFIABILITY","REMOVING_CLASS_DERIVABILITY","REMOVING_METHOD_OVERRIDABILITY","ADDING_CLASS_DERIVABILITY","ADDING_CLASS_DERIVABILITY","ADDING_METHOD_OVERRIDABILITY", "TOTAL_DECLARATIONPARTCHANGES"};
+		    		"ADDING_ATTRIBUTE_MODIFIABILITY","REMOVING_ATTRIBUTE_MODIFIABILITY","REMOVING_CLASS_DERIVABILITY","REMOVING_METHOD_OVERRIDABILITY","ADDING_CLASS_DERIVABILITY","ADDING_CLASS_DERIVABILITY","ADDING_METHOD_OVERRIDABILITY", "TOTAL_DECLARATIONPARTCHANGES","TOTAL_CHANGES"};
 		    String[] data1 = {projectName,currentCommit,previousCommit,classCurrentCommit,classPreviousCommit};
 		    String[] data2 = ArrayUtils.addAll(data1,statementLevelChanges.getCsvDataSimple());
 		    String[] data3 = ArrayUtils.addAll(data2,classDeclarationChanges.getCsvDataSimple());
 		    String[] data4 = ArrayUtils.addAll(data3,methodDeclarationChanges.getCsvDataSimple());
 		    String[] data5 = ArrayUtils.addAll(data4,attributeDeclarationChanges.getCsvDataSimple());
-		    String[] dataFinal = ArrayUtils.addAll(data5,declarationPartChange.getCsvDataSimple());
+		    String[] data6 = ArrayUtils.addAll(data5,declarationPartChange.getCsvDataSimple());
+		    
+		    int total = statementLevelChanges.getTotal() + classDeclarationChanges.getTotal() + methodDeclarationChanges.getTotal() + attributeDeclarationChanges.getTotal() + declarationPartChange.getTotal();
+		    
+		    String[] totalH = {""+total};
+		    
+		    String[] all = ArrayUtils.addAll(data6,totalH);
 		    
 		    List<String[]> csvData = new ArrayList<>();
+		    File file = new File(csvPath);
+	       
+	        boolean exists = file.exists();
 
-		    try (CSVWriter writer = new CSVWriter(new FileWriter(csvPath))) {
+	        if(!exists) {
+	        	csvData.add(header);
+	        	try {
+					file.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
+
+		    csvData.add(all);
+
+		    try (CSVWriter writer = new CSVWriter(new FileWriter(csvPath,true))) {
 	            writer.writeAll(csvData);
 	        
 		    } catch (IOException e) {
