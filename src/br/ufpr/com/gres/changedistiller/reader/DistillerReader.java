@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -173,7 +174,7 @@ public class DistillerReader {
 			}
 		    //para cada projeto (em um determinado commit) gerar um csv contendo o nome do projeto, commit analisado ( commit N e N-1), classe, os FGC e total de FGC
 					
-		  //  System.out.println(statementLevelChanges.toString());
+		 //   System.out.println(statementLevelChanges.toString());
 		 //   System.out.println(classDeclarationChanges.toString());
 		 //   System.out.println(methodDeclarationChanges.toString());
 		  //  System.out.println(attributeDeclarationChanges.toString());
@@ -202,13 +203,13 @@ public class DistillerReader {
 		    File file = new File(csvPath);
 	       
 	        boolean exists = file.exists();
-
 	        if(!exists) {
 	        	csvData.add(header);
 	        	try {
 					file.createNewFile();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
+					 System.out.println("error to check file");
 					e.printStackTrace();
 				}
 	        }
@@ -216,7 +217,7 @@ public class DistillerReader {
 		    csvData.add(all);
 
 		    try (CSVWriter writer = new CSVWriter(new FileWriter(csvPath,true))) {
-	            writer.writeAll(csvData);
+		    	writer.writeAll(csvData);
 	        
 		    } catch (IOException e) {
 				e.printStackTrace();
